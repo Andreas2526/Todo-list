@@ -13,8 +13,34 @@ body {
 
 header {
     font-size: 1.5rem;
+}
+
+header, 
+form {
     min-height: 15vh;
     display: flex;
     justify-content: center;
-    align-items: center;    
+    align-items: center;
+}
+
+form input,
+form button {
+    padding: 0rem;
+    font-size: 2rem;
+    border: none;
+    background: white;
+}
+
+form button {
+    color: #3ecc2b;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family:Georgia, serif;
+    width: 40px;
+}
+
+form button:hover {
+    background: #3ecc2b;
+    color: white;
 }
