@@ -2,7 +2,7 @@
 var nextId = 1;
 var tasks = [];
 
-getStoredValues();
+init(true);
 
 document.addEventListener("click", function (e) {
     e.preventDefault();
@@ -11,17 +11,36 @@ document.addEventListener("click", function (e) {
     console.log(clicked);
 });
 
-function addTask(taskName) {
-    
+function init(setFocus = false) {
+    document.getElementById("tasklist").textContent = '';
+    getStoredValues();
+    tasks.forEach(item => {
+        createListItem(item.name, item.id, item.done);
+    });
+    setCounter();
+    if (setFocus) {
+        document.getElementById("todoInput").focus();
+    }
+}
+
+function addTask() {
+    var inputValue = document.getElementById("todoInput").value;
+    if (inputValue === '') {
+        alert("Task name is empty!");
+        return;
+    }
     getStoredValues();
     let newTask = {
         id: nextId++,
-        name: taskName,
+        name: inputValue,
         done: false
     }
 
     tasks.push(newTask);
     saveValues();
+    createListItem(newTask.name, newTask.id, newTask.done);
+    document.getElementById("todoInput").value = "";
+    setCounter();
 }
 
 function getStoredValues() {
@@ -47,55 +66,62 @@ function saveValues() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-function addTask() {
+function createListItem(taskname, taskId, checked) {
     var li = document.createElement("li");
-    var inputValue = document.getElementById("todoInput").value;
-    var t = document.createTextNode(inputValue);
-    li.appendChild(t);
-    if (inputValue === '') {
-      alert("You must write something!");
-    } else {
-      document.getElementById("myUL").appendChild(li);
+    li.setAttribute("onclick","setChecked(event, " + taskId +")")
+    var t = document.createTextNode(taskname);
+    if (checked) {
+        li.setAttribute("class", "check")
     }
-    document.getElementById("todoInput").value = "";
+    li.appendChild(t);
+    document.getElementById("tasklist").appendChild(li);
+    
   
     var span = document.createElement("SPAN");
     var txt = document.createTextNode("\u00D7");
     span.className = "close";
     span.appendChild(txt);
+    span.setAttribute("onclick", "deleteTask(" + taskId + ")");
     li.appendChild(span);
-  
-    for (i = 0; i < close.length; i++) {
-      close[i].onclick = function() {
-        var div = this.parentElement;
-        div.style.display = "none";
-      }
-    }
-}
-// legger til en task når man trykker på (Add Task) knappen
-var myNodelist = document.getElementsByTagName("LI");
-var i;
-for (i = 0; i < myNodelist.length; i++) {
-  var span = document.createElement("span");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  myNodelist[i].appendChild(span);
-}
-//viser en x for å lukke tasken
-var close = document.getElementsByClassName("close");
-var i;
-for (i = 0; i < close.length; i++) {
-  close[i].onclick = function() {
-    var div = this.parentElement;
-    div.style.display = "none";
-  }
 }
 
-//viser check symbol når man trykker på tasken
-var list = document.querySelector('ul');
-list.addEventListener('click', function(ev) {
-  if (ev.target.tagName === 'LI') {
-    ev.target.classList.toggle('check');
-  }
-}, false);
+function setChecked(ev, taskid) {
+    if (ev.target.tagName === 'LI') {
+        ev.target.classList.toggle('check');
+    }
+    getStoredValues();
+    tasks.forEach(item => {
+        if (item.id === taskid) {
+            item.done = !item.done;
+        }
+    });
+    saveValues();
+    setCounter();
+}
+
+function deleteTask(id) {
+    getStoredValues();
+    tasks.forEach(item => {
+        if (item.id === id) {
+            var index = tasks.indexOf(item);
+            if (index !== -1) {
+                tasks.splice(index, 1);
+            }
+        }
+    });
+    saveValues();
+    init();
+}
+
+function setCounter() {
+    var length = tasks.length;
+    var done = tasks.filter(item => item.done === true).length;
+    var textnode = document.getElementById('counter');
+    var newText = done + " of " + length + " is done";
+    if (length === 0) {
+        textnode.innerText = '';
+    } else {
+        textnode.innerText = newText;    
+    }
+
+}
